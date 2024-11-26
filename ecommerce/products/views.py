@@ -14,6 +14,13 @@ class DemoView(APIView):
 
 class ProductView(APIView):
     def get(self, request):
-        product = Product.objects.all()
+        category = self.request.query_params.get('category')  
+        if category:
+            product = Product.objects.filter(category__category_name__iexact=category)
+            if product.count() == 0:
+                return Response({"Error": "No product found for this category"})
+        else: 
+            product = Product.objects.all()
         serializer = ProductSerializer(product, many=True)
-        return Response(serializer.data)
+        return Response({'count' : len(serializer.data) ,'data' :serializer.data})
+
